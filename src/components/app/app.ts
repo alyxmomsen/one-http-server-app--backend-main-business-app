@@ -79,8 +79,10 @@ export class App implements IApp {
             switch (data.opcode) {
                 case EnumHookOpCode.add_transaction:
                     console.log('request to add transaction');
+                    break;
                 case EnumHookOpCode.other:
                     console.log('request to the other');
+                    break;
             }
 
             console.log(data);
