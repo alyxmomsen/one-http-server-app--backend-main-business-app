@@ -28,12 +28,19 @@ export type TAxiosResponse = {
 
 export interface IApp {
     update(): void;
+    // addUserTransaction(): void;
 }
 
 export class App implements IApp {
     /**hook request status */
     private hookRequestStatus: EnumHookRequestStatus;
     private user: User;
+
+    private addUserTransaction() {
+        this.user.addTransactionIntoThePull(
+            new Transaction(Date.now() + 1000, 100_000)
+        );
+    }
 
     /**
      * на 2025.03.31
@@ -79,6 +86,7 @@ export class App implements IApp {
             switch (data.opcode) {
                 case EnumHookOpCode.add_transaction:
                     console.log('request to add transaction');
+                    this.addUserTransaction();
                     break;
                 case EnumHookOpCode.other:
                     console.log('request to the other');
