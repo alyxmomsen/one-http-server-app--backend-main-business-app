@@ -4,8 +4,8 @@
     "description": "",
     "main": "index.js",
     "scripts": {
-        "start": "node ./dist/",
-        "build": "prettier --write src & tsc -p tsconfig.json"
+        "build": "prettier --write src & tsc -p tsconfig.json",
+        "start": "node ./dist/"
     },
     "keywords": [],
     "author": "",

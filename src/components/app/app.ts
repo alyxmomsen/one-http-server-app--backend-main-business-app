@@ -7,15 +7,23 @@ import { Transaction } from '../transaction/Transaction';
  * для определения дальнейших действий,
  * например: ждать или отправлять новый
  */
-export enum hookRequestStatus {
+export enum EnumHookRequestStatus {
     'idle',
     'error',
     'ok',
     'requesting',
 }
 
+export enum EnumHookOpCode {
+    add_transaction,
+    other,
+}
+
+/**
+ * этот тип данных должен совпадать с типом данных что передаются с HTTP сервера
+ */
 export type TAxiosResponse = {
-    foo: string;
+    opcode: EnumHookOpCode;
 };
 
 export interface IApp {
@@ -24,22 +32,22 @@ export interface IApp {
 
 export class App implements IApp {
     /**hook request status */
-    private hookRequestStatus: hookRequestStatus;
+    private hookRequestStatus: EnumHookRequestStatus;
     private user: User;
 
     /**
      * на 2025.03.31
      * метод вызывает у единственного пользователя method Update
-     * а так же 
+     * а так же
      * контролирует состояние хука
      */
     update() {
         this.user.update();
 
         if (
-            this.hookRequestStatus === hookRequestStatus.error ||
-            this.hookRequestStatus === hookRequestStatus.idle ||
-            this.hookRequestStatus === hookRequestStatus.ok
+            this.hookRequestStatus === EnumHookRequestStatus.error ||
+            this.hookRequestStatus === EnumHookRequestStatus.idle ||
+            this.hookRequestStatus === EnumHookRequestStatus.ok
         ) {
             this.sendHook();
         }
@@ -60,7 +68,7 @@ export class App implements IApp {
              * это нужно что бы метод app::update мог обрабатывать статус
              * и принимать дальнейшие решения
              */
-            this.hookRequestStatus = hookRequestStatus.requesting;
+            this.hookRequestStatus = EnumHookRequestStatus.requesting;
             const response = await axios<TAxiosResponse>({
                 method: 'post',
                 // url: 'http://192.168.29.27:3000/api/hook',
@@ -68,12 +76,19 @@ export class App implements IApp {
             });
             const data = response.data;
 
+            switch (data.opcode) {
+                case EnumHookOpCode.add_transaction:
+                    console.log('request to add transaction');
+                case EnumHookOpCode.other:
+                    console.log('request to the other');
+            }
+
             console.log(data);
 
-            this.hookRequestStatus = hookRequestStatus.ok;
+            this.hookRequestStatus = EnumHookRequestStatus.ok;
         } catch (e) {
             console.log('error');
-            this.hookRequestStatus = hookRequestStatus.error;
+            this.hookRequestStatus = EnumHookRequestStatus.error;
         }
     }
 
@@ -89,7 +104,7 @@ export class App implements IApp {
 
     constructor() {
         this.user = new User();
-        this.hookRequestStatus = hookRequestStatus.idle;
+        this.hookRequestStatus = EnumHookRequestStatus.idle;
 
         /**
          * тестовые транзакции
